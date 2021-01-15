@@ -1,0 +1,4 @@
+imageio>=2.9.0
+imageio-ffmpeg>=0.4.0
+scikit-image>=0.18.0
+rich>=9.8.0
