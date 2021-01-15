@@ -8,7 +8,7 @@ from skimage.util import img_as_ubyte
 from rich.console import Console
 
 
-def create_movie(video_name, video_format, fn_glob, *, shape, loop, noresize):
+def create_movie(video_name, video_format, fn_glob, *, shape, loop, noresize, fps):
     """
     Create an MP4 movie from the PNG images
 
@@ -23,7 +23,8 @@ def create_movie(video_name, video_format, fn_glob, *, shape, loop, noresize):
           video_format (str): FFMPEG or MP4
           fn_glob (str): a filename glob [default='*.png']
           shape (tuple): the required shape of the images
-          loop (int): number of times to loop
+          loop (int): number of times to repeat the sequence of images
+          fps (int): the number of frames per second
     """
     images = []
     for img in sorted(glob.glob(fn_glob)):
@@ -48,7 +49,7 @@ def create_movie(video_name, video_format, fn_glob, *, shape, loop, noresize):
         console.print(f"Number of concatenated images: {len(all_images)}")
 
     if video_format.lower() == "ffmpeg":
-        kwargs = {'fps': 20, 'pixelformat': 'yuv420p'}
+        kwargs = {'fps': fps, 'pixelformat': 'yuv420p'}
         imageio.mimwrite(video_name, all_images, 'FFMPEG', **kwargs)
     else:
         kwargs = {}
@@ -91,7 +92,7 @@ def parse_arguments():
         "--files",
         required=True,
         type=str, default="*.png",
-        help="A file glob [default='*.png'].",
+        help="A file glob [default='*.png']. Should be put in single quotes.",
     )
     parser.add_argument(
         "--shape",
@@ -99,14 +100,19 @@ def parse_arguments():
         help="The required shape to which the images will be resized, e.g. '(2186, 3496, 4)'.",
     )
     parser.add_argument(
+        "--fps",
+        type=int, default=20,
+        help="The number of frames per second [default=20].",
+    )
+    parser.add_argument(
         "--loop",
         type=int, default=1,
-        help="The number of times the video has to loop over all the frames.",
+        help="The number of times the video has to loop over all the frames [default=1].",
     )
     parser.add_argument(
         "--noresize", "--no-resize",
         action="store_true",
-        help="If all images already have the same size already.",
+        help="Don't resize if all images already have the same size.",
     )
 
     arguments = parser.parse_args()
@@ -128,7 +134,7 @@ def main():
         shape = None
 
     create_movie(args.video_name, args.video_format, args.files,
-                 shape=shape, loop=args.loop, noresize=args.noresize)
+                 shape=shape, loop=args.loop, noresize=args.noresize, fps=args.fps)
 
 
 console = Console()
