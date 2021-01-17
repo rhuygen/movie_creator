@@ -116,6 +116,20 @@ def parse_arguments():
     )
 
     arguments = parser.parse_args()
+
+    if arguments.shape:
+        shape = arguments.shape
+
+        if not (shape.startswith('(') and shape.endswith(')')):
+            parser.error("--shape must be a tuple, i.e. (width, height, depth).")
+
+        shape = shape[1:-1].split(',')
+
+        if not (len(shape) == 2 or len(shape) == 3):
+            parser.error("--shape must be a tuple, i.e. (width, height, depth).")
+
+        shape = tuple(int(x) for x in shape)
+        arguments.shape = shape
     return arguments
 
 
@@ -126,15 +140,8 @@ def main():
 
     verbose = args.verbose
 
-    if args.shape:
-        shape = args.shape[1:-1].split(',')
-        shape = tuple(int(x) for x in shape)
-        print(f"{shape=}")
-    else:
-        shape = None
-
     create_movie(args.video_name, args.video_format, args.files,
-                 shape=shape, loop=args.loop, noresize=args.noresize, fps=args.fps)
+                 shape=args.shape, loop=args.loop, noresize=args.noresize, fps=args.fps)
 
 
 console = Console()
